@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profitto — PLACAR</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #0a0a0f;
+  --bg2:      #12121a;
+  --bg3:      #1a1a26;
+  --border:   rgba(255,255,255,0.08);
+
+  --senior:   #f59e0b;
+  --senior-bg:rgba(245,158,11,0.12);
+  --pleno:    #3b82f6;
+  --pleno-bg: rgba(59,130,246,0.12);
+  --junior:   #10b981;
+  --junior-bg:rgba(16,185,129,0.12);
+
+  --green:    #22c55e;
+  --red:      #ef4444;
+  --white:    #f8f8f8;
+  --dim:      rgba(248,248,248,0.35);
+  --gold:     #fbbf24;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+html, body {
+  height:100%; overflow:hidden;
+  font-family:'Barlow', sans-serif;
+  background:var(--bg);
+  color:var(--white);
+}
+
+/* ── SCANLINES effect ── */
+body::after {
+  content:''; position:fixed; inset:0;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 2px,
+    rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px
+  );
+  pointer-events:none; z-index:999;
+}
+
+/* ── LAYOUT ── */
+.app {
+  height:100vh;
+  display:grid;
+  grid-template-rows: 56px 1fr;
+}
+
+/* ── HEADER ── */
+.header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 28px;
+  background:var(--bg2);
+  border-bottom:1px solid var(--border);
+  position:relative;
+}
+.header-logo {
+  font-family:'Barlow Condensed'; font-size:20px; font-weight:900;
+  letter-spacing:3px; text-transform:uppercase; color:var(--white);
+}
+.header-logo span { color:var(--gold); }
+.header-center {
+  position:absolute; left:50%; transform:translateX(-50%);
+  display:flex; align-items:center; gap:16px;
+}
+.live-badge {
+  display:flex; align-items:center; gap:6px;
+  font-family:'Barlow Condensed'; font-size:11px; font-weight:700;
+  letter-spacing:3px; text-transform:uppercase;
+  color:var(--green); border:1px solid rgba(34,197,94,0.3);
+  padding:4px 12px; border-radius:2px;
+  background:rgba(34,197,94,0.08);
+}
+.live-dot { width:6px; height:6px; border-radius:50%; background:var(--green); animation:blink 1.5s ease-in-out infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+.month-badge {
+  font-family:'Barlow Condensed'; font-size:13px; font-weight:700;
+  letter-spacing:2px; text-transform:uppercase; color:var(--dim);
+}
+.header-right {
+  display:flex; align-items:center; gap:20px;
+}
+.update-time { font-family:'DM Mono'; font-size:10px; color:var(--dim); }
+.clock { font-family:'DM Mono'; font-size:14px; font-weight:500; color:var(--white); }
+
+/* ── BODY ── */
+.body {
+  display:grid;
+  grid-template-columns: 1fr 260px;
+  grid-template-rows: 1fr;
+  overflow:hidden;
+  gap:0;
+}
+
+/* ── RANKING PRINCIPAL ── */
+.ranking-section {
+  display:flex; flex-direction:column; overflow:hidden;
+  border-right:1px solid var(--border);
+}
+
+.ranking-header {
+  padding:14px 24px 10px;
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+  flex-shrink:0;
+}
+.ranking-title {
+  font-family:'Barlow Condensed'; font-size:11px; font-weight:700;
+  letter-spacing:5px; text-transform:uppercase; color:var(--dim);
+}
+.dias-info {
+  font-family:'DM Mono'; font-size:10px; color:var(--dim);
+}
+
+/* ── PLAYER ROW ── */
+.player-list { flex:1; overflow-y:auto; padding:8px 16px 8px; display:flex; flex-direction:column; gap:6px; }
+
+.player-row {
+  display:grid;
+  grid-template-columns: 44px 1fr 130px 110px 64px 160px;
+  align-items:center; gap:0;
+  padding:10px 12px;
+  border-radius:4px;
+  border:1px solid transparent;
+  transition:all 0.3s ease;
+  position:relative;
+  overflow:hidden;
+}
+.player-row::before {
+  content:''; position:absolute; left:0; top:0; bottom:0; width:3px;
+}
+.player-row.senior::before { background:var(--senior); }
+.player-row.pleno::before  { background:var(--pleno); }
+.player-row.junior::before { background:var(--junior); }
+
+.player-row.senior { background:var(--senior-bg); border-color:rgba(245,158,11,0.15); }
+.player-row.pleno  { background:var(--pleno-bg);  border-color:rgba(59,130,246,0.15); }
+.player-row.junior { background:var(--junior-bg); border-color:rgba(16,185,129,0.15); }
+
+.player-row.top1 { transform:scale(1.01); border-width:1px; }
+.player-row.top1.senior { border-color:rgba(245,158,11,0.4); }
+.player-row.top1.pleno  { border-color:rgba(59,130,246,0.4); }
+.player-row.top1.junior { border-color:rgba(16,185,129,0.4); }
+
+/* posição */
+.p-pos {
+  font-family:'Barlow Condensed'; font-weight:900; font-size:22px;
+  text-align:center; color:var(--dim);
+}
+.p-pos.top { font-size:26px; color:var(--white); }
+
+/* nome + time */
+.p-info { display:flex; flex-direction:column; gap:2px; padding-left:4px; }
+.p-name {
+  font-family:'Barlow Condensed'; font-size:18px; font-weight:800;
+  text-transform:uppercase; letter-spacing:1px; line-height:1;
+}
+.p-tag {
+  font-size:9px; font-weight:700; letter-spacing:3px; text-transform:uppercase;
+  padding:1px 6px; border-radius:2px; display:inline-block; width:fit-content;
+}
+.p-tag.senior { color:var(--senior); background:rgba(245,158,11,0.15); }
+.p-tag.pleno  { color:var(--pleno);  background:rgba(59,130,246,0.15); }
+.p-tag.junior { color:var(--junior); background:rgba(16,185,129,0.15); }
+
+/* captação */
+.p-cap {
+  font-family:'Barlow Condensed'; font-size:22px; font-weight:800;
+  text-align:right; white-space:nowrap;
+}
+.p-cap.pos { color:var(--green); }
+.p-cap.neg { color:var(--red); }
+
+/* % meta */
+.p-pct-wrap { display:flex; flex-direction:column; align-items:flex-end; gap:3px; padding:0 8px; }
+.p-pct {
+  font-family:'Barlow Condensed'; font-size:20px; font-weight:800;
+}
+.p-bar { height:3px; width:80px; background:rgba(255,255,255,0.1); border-radius:2px; overflow:hidden; }
+.p-bar-fill { height:100%; border-radius:2px; transition:width 1.4s ease; }
+.p-bar-fill.senior { background:var(--senior); }
+.p-bar-fill.pleno  { background:var(--pleno); }
+.p-bar-fill.junior { background:var(--junior); }
+
+/* intensidade */
+.p-int { display:flex; gap:4px; justify-content:flex-end; }
+.p-badge {
+  font-family:'DM Mono'; font-size:11px; font-weight:500;
+  padding:3px 7px; border-radius:3px; text-align:center;
+  min-width:28px;
+}
+.p-badge.l1-ok { background:rgba(34,197,94,0.2);  color:var(--green); }
+.p-badge.l1-0  { background:rgba(255,255,255,0.05); color:var(--dim); }
+.p-badge.r1-ok { background:rgba(251,191,36,0.2);  color:var(--gold); }
+.p-badge.r1-0  { background:rgba(255,255,255,0.05); color:var(--dim); }
+.p-badge.r2-ok { background:rgba(59,130,246,0.2);  color:var(--pleno); }
+.p-badge.r2-0  { background:rgba(255,255,255,0.05); color:var(--dim); }
+.p-badge.r3-ok { background:rgba(139,92,246,0.2);  color:#a78bfa; }
+.p-badge.r3-0  { background:rgba(255,255,255,0.05); color:var(--dim); }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  display:flex; flex-direction:column;
+  overflow:hidden; background:var(--bg2);
+}
+
+/* times totais */
+.teams-section {
+  flex-shrink:0;
+  border-bottom:1px solid var(--border);
+}
+.section-label {
+  font-family:'Barlow Condensed'; font-size:9px; font-weight:700;
+  letter-spacing:5px; text-transform:uppercase; color:var(--dim);
+  padding:12px 16px 6px;
+}
+.team-card {
+  padding:10px 16px;
+  border-bottom:1px solid var(--border);
+  display:flex; flex-direction:column; gap:4px;
+  position:relative; overflow:hidden;
+}
+.team-card::after {
+  content:''; position:absolute; right:0; top:0; bottom:0; width:2px;
+}
+.team-card.senior::after { background:var(--senior); }
+.team-card.pleno::after  { background:var(--pleno); }
+.team-card.junior::after { background:var(--junior); }
+
+.team-name {
+  font-family:'Barlow Condensed'; font-size:10px; font-weight:700;
+  letter-spacing:4px; text-transform:uppercase;
+}
+.team-name.senior { color:var(--senior); }
+.team-name.pleno  { color:var(--pleno); }
+.team-name.junior { color:var(--junior); }
+
+.team-val {
+  font-family:'Barlow Condensed'; font-size:24px; font-weight:900; line-height:1;
+}
+.team-val.pos { color:var(--green); }
+.team-val.neg { color:var(--red); }
+
+.team-row { display:flex; align-items:center; justify-content:space-between; }
+.team-pct { font-family:'DM Mono'; font-size:11px; }
+.team-pct.senior { color:var(--senior); }
+.team-pct.pleno  { color:var(--pleno); }
+.team-pct.junior { color:var(--junior); }
+.team-bar { height:2px; background:rgba(255,255,255,0.08); border-radius:1px; overflow:hidden; margin-top:2px; }
+.team-bar-fill { height:100%; border-radius:1px; transition:width 1.4s ease; }
+.team-bar-fill.senior { background:var(--senior); }
+.team-bar-fill.pleno  { background:var(--pleno); }
+.team-bar-fill.junior { background:var(--junior); }
+
+/* totais gerais */
+.totals-section { flex:1; padding:12px 16px; display:flex; flex-direction:column; gap:10px; }
+.total-item { display:flex; flex-direction:column; gap:2px; }
+.total-label {
+  font-family:'Barlow Condensed'; font-size:9px; font-weight:700;
+  letter-spacing:4px; text-transform:uppercase; color:var(--dim);
+}
+.total-val {
+  font-family:'Barlow Condensed'; font-size:26px; font-weight:900; line-height:1;
+}
+.total-val.neg { color:var(--red); }
+.total-val.warn { color:var(--gold); }
+.total-val.good { color:var(--green); }
+.total-sub { font-size:10px; color:var(--dim); }
+.total-sub.neg  { color:var(--red); }
+.total-sub.good { color:var(--green); }
+.total-sub.warn { color:var(--gold); }
+
+/* divider */
+.divider { height:1px; background:var(--border); margin:4px 0; }
+
+/* scrollbar */
+::-webkit-scrollbar { width:3px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+/* loading */
+.loading-screen {
+  position:fixed; inset:0; background:var(--bg); z-index:500;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px;
+  transition:opacity 0.5s ease, visibility 0.5s ease;
+}
+.loading-screen.hidden { opacity:0; visibility:hidden; pointer-events:none; }
+.loading-title {
+  font-family:'Barlow Condensed'; font-size:32px; font-weight:900;
+  letter-spacing:8px; text-transform:uppercase; color:var(--white);
+}
+.loading-title span { color:var(--gold); }
+.loading-bar-wrap { width:200px; height:2px; background:rgba(255,255,255,0.1); border-radius:1px; }
+.loading-bar { height:100%; width:0%; background:var(--gold); animation:loadBar 1.2s ease 0.3s forwards; border-radius:1px; }
+@keyframes loadBar { to { width:100%; } }
+.loading-sub {
+  font-size:10px; font-weight:600; letter-spacing:5px; text-transform:uppercase;
+  color:var(--dim); animation:fadeIn 0.5s ease 0.5s both;
+}
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+</style>
+</head>
+<body>
+
+<div class="loading-screen" id="loading">
+  <div class="loading-title">PROFITTO <span>GAME</span></div>
+  <div class="loading-bar-wrap"><div class="loading-bar"></div></div>
+  <div class="loading-sub">Carregando placar</div>
+</div>
+
+<div class="app">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-logo">PROFITTO <span>GAME</span></div>
+    <div class="header-center">
+      <div class="live-badge"><span class="live-dot"></span>AO VIVO</div>
+      <div class="month-badge" id="month-badge">MARÇO 2026</div>
+    </div>
+    <div class="header-right">
+      <div class="update-time" id="update-time">—</div>
+      <div class="clock" id="clock">00:00:00</div>
+    </div>
+  </header>
+
+  <!-- BODY -->
+  <div class="body">
+
+    <!-- RANKING -->
+    <div class="ranking-section">
+      <div class="ranking-header">
+        <div class="ranking-title">🏆 Ranking Individual — Captação</div>
+        <div class="dias-info" id="dias-info">—</div>
+      </div>
+      <div class="player-list" id="player-list">
+      </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="teams-section">
+        <div class="section-label">Times</div>
+        <div id="team-cards"></div>
+      </div>
+      <div class="totals-section" id="totals-section">
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const SHEET_ID  = '1pgia0yJlVYF5CfRlM9AloyCJUOXw0pwPu36CdVqisEk';
+const API_KEY   = 'AIzaSyCu2_6jRfuXwqLC4nj-cpMX36AGeWOvXPE';
+const SHEET_TAB = 'DASH - MARÇO';
+const SHEET_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(SHEET_TAB)}!A1:O35?key=${API_KEY}`;
+
+// Mapeamento de nível
+const NIVEIS = {
+  'SÊNIOR':'senior','Sênior':'senior','sênior':'senior',
+  'PLENO':'pleno','Pleno':'pleno','pleno':'pleno',
+  'JÚNIOR':'junior','Júnior':'junior','júnior':'junior',
+  'JUNIOR':'junior','Junior':'junior','junior':'junior',
+};
+
+const NIVEL_LABEL = {senior:'Sênior', pleno:'Pleno', junior:'Júnior'};
+const NIVEL_META  = {senior:2000000, pleno:1500000, junior:1000000};
+
+// Feriados RS
+const FERIADOS = new Set(['01-01','04-18','04-21','05-01','06-19','09-07','09-20','10-12','11-02','11-15','11-20','12-25']);
+function isDiaUtil(d){ const dw=d.getDay(); if(dw===0||dw===6) return false; const k=String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); return !FERIADOS.has(k); }
+function calcDU(ano,mes){ const dias=new Date(ano,mes+1,0).getDate(); let c=0; for(let d=1;d<=dias;d++) if(isDiaUtil(new Date(ano,mes,d))) c++; return c; }
+function calcDUPass(ano,mes){ const hoje=new Date(); const ult=hoje.getFullYear()===ano&&hoje.getMonth()===mes?hoje.getDate():new Date(ano,mes+1,0).getDate(); let c=0; for(let d=1;d<=ult;d++) if(isDiaUtil(new Date(ano,mes,d))) c++; return c; }
+const _h=new Date();
+const DU_MES=calcDU(_h.getFullYear(),_h.getMonth());
+const DU_PASS=calcDUPass(_h.getFullYear(),_h.getMonth());
+
+function fmt(v){
+  if(v===null||v===undefined||isNaN(v)) return '—';
+  const abs=Math.abs(v); const neg=v<0?'-':'';
+  if(abs>=1000000) return neg+'R$'+(abs/1000000).toFixed(1)+'M';
+  if(abs>=1000)    return neg+'R$'+(abs/1000).toFixed(0)+'K';
+  return neg+'R$'+abs.toFixed(0);
+}
+
+function parseNum(s){
+  if(!s) return 0;
+  let str=String(s).trim();
+  const isNeg=str.startsWith('(')&&str.endsWith(')');
+  if(isNeg) str=str.slice(1,-1);
+  str=str.replace(/R\$|\s/g,'').replace(/\./g,'').replace(',','.');
+  const n=parseFloat(str);
+  return isNaN(n)?0:(isNeg?-n:n);
+}
+
+function updateClock(){ document.getElementById('clock').textContent=new Date().toLocaleTimeString('pt-BR'); }
+updateClock(); setInterval(updateClock,1000);
+
+async function loadData(){
+  try {
+    const res=await fetch(SHEET_URL);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const json=await res.json();
+    processData(json.values||[]);
+  } catch(e) {
+    console.error(e);
+    document.getElementById('player-list').innerHTML='<div style="color:rgba(255,255,255,0.3);padding:20px;font-size:12px;letter-spacing:2px">ERRO AO CARREGAR DADOS</div>';
+    document.getElementById('loading').classList.add('hidden');
+  }
+}
+
+function processData(rows){
+  // Linha 2 = B2 = data atualização (índice 1, col 1)
+  if(rows[1]&&rows[1][1]){
+    const ts=String(rows[1][1]).trim();
+    if(ts) document.getElementById('update-time').textContent='atualizado: '+ts;
+  }
+
+  // Assessores: linhas 6-16 (índices 5-15)
+  // Cols: B=L1(0→já é col A offset), mas a planilha começa em A
+  // Estrutura: A=L1, B=R1, C=R2, D=R3, E=TIME, F=vazio, G=Assessor, H=Captado, I=Meta, J=%
+  const assessores=[];
+  for(let i=5;i<=15;i++){
+    const row=rows[i];
+    if(!row||!row[6]) continue;
+    const nome=String(row[6]).trim();
+    if(!nome||nome==='TOTAL'||nome==='MÉDIA'||nome==='Assessor') continue;
+    const timeRaw=String(row[4]||'').trim();
+    const nivelKey=NIVEIS[timeRaw]||'junior';
+    const cap=parseNum(row[7]);
+    const metaRaw=parseNum(row[8]);
+    const meta=metaRaw>0?metaRaw:NIVEL_META[nivelKey];
+    const l1=parseInt(row[0])||0;
+    const r1=parseInt(row[1])||0;
+    const r2=parseInt(row[2])||0;
+    const r3=parseInt(row[3])||0;
+    assessores.push({nome,nivelKey,cap,meta,l1,r1,r2,r3});
+  }
+
+  // Times consolidados: linhas 28-30 (índices 27-29)
+  // Júnior(27), Pleno(28), Sênior(29)
+  const times={junior:{cap:0,meta:0,l1:0,r1:0},pleno:{cap:0,meta:0,l1:0,r1:0},senior:{cap:0,meta:0,l1:0,r1:0}};
+  const timeRows=[
+    {idx:27,key:'junior'},{idx:28,key:'pleno'},{idx:29,key:'senior'}
+  ];
+  for(const {idx,key} of timeRows){
+    const row=rows[idx];
+    if(!row) continue;
+    times[key].cap=parseNum(row[7]);
+    times[key].meta=parseNum(row[8])||0;
+    times[key].l1=parseInt(row[0])||0;
+    times[key].r1=parseInt(row[1])||0;
+  }
+
+  renderAll(assessores, times);
+}
+
+function renderAll(assessores, times){
+  // Ordenar por captação
+  const sorted=[...assessores].sort((a,b)=>b.cap-a.cap);
+  const maxCap=Math.max(...sorted.map(a=>Math.abs(a.cap)),1);
+  const medals=['🥇','🥈','🥉'];
+
+  document.getElementById('dias-info').textContent=`DIA ${DU_PASS} DE ${DU_MES}`;
+
+  // Player list
+  document.getElementById('player-list').innerHTML=sorted.map((a,i)=>{
+    const p=a.meta>0?a.cap/a.meta*100:0;
+    const barW=Math.max(Math.min(p,100),0);
+    const pc=p>=100?'var(--green)':p>=50?'var(--gold)':'var(--red)';
+    const k=a.nivelKey;
+    const pos=i<3?medals[i]:String(i+1).padStart(2,'0');
+    const capCls=a.cap>=0?'pos':'neg';
+    const firstName=a.nome.split(' ')[0].toUpperCase();
+    return `<div class="player-row ${k}${i===0?' top1':''}">
+      <div class="p-pos${i<3?' top':''}">${pos}</div>
+      <div class="p-info">
+        <div class="p-name">${firstName}</div>
+        <span class="p-tag ${k}">${NIVEL_LABEL[k]}</span>
+      </div>
+      <div class="p-cap ${capCls}">${fmt(a.cap)}</div>
+      <div class="p-pct-wrap">
+        <div class="p-pct" style="color:${pc}">${p.toFixed(0)}%</div>
+        <div class="p-bar"><div class="p-bar-fill ${k}" data-w="${barW}" style="width:0%"></div></div>
+      </div>
+      <div class="p-int">
+        <span class="p-badge ${a.l1>0?'l1-ok':'l1-0'}" title="L1">${a.l1}</span>
+        <span class="p-badge ${a.r1>0?'r1-ok':'r1-0'}" title="R1">${a.r1}</span>
+        <span class="p-badge ${a.r2>0?'r2-ok':'r2-0'}" title="R2">${a.r2}</span>
+        <span class="p-badge ${a.r3>0?'r3-ok':'r3-0'}" title="R3">${a.r3}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Times
+  const timeOrder=[
+    {key:'senior',label:'SÊNIOR'},{key:'pleno',label:'PLENO'},{key:'junior',label:'JÚNIOR'}
+  ];
+  document.getElementById('team-cards').innerHTML=timeOrder.map(({key,label})=>{
+    const t=times[key];
+    // Calcular dos assessores se times não vieram
+    const capSum=assessores.filter(a=>a.nivelKey===key).reduce((s,a)=>s+a.cap,0);
+    const metaSum=assessores.filter(a=>a.nivelKey===key).reduce((s,a)=>s+a.meta,0);
+    const cap=t.cap||capSum; const meta=t.meta||metaSum;
+    const p=meta>0?cap/meta*100:0;
+    const barW=Math.max(Math.min(p,100),0);
+    return `<div class="team-card ${key}">
+      <div class="team-name ${key}">${label}</div>
+      <div class="team-val ${cap>=0?'pos':'neg'}">${fmt(cap)}</div>
+      <div class="team-row">
+        <div class="team-pct ${key}">${p.toFixed(0)}%</div>
+        <div style="font-family:'DM Mono';font-size:9px;color:var(--dim)">${fmt(meta)}</div>
+      </div>
+      <div class="team-bar"><div class="team-bar-fill ${key}" data-w="${barW}" style="width:0%"></div></div>
+    </div>`;
+  }).join('');
+
+  // Totais gerais
+  const capTotal=assessores.reduce((s,a)=>s+a.cap,0);
+  const metaTotal=assessores.reduce((s,a)=>s+a.meta,0);
+  const pctTotal=metaTotal>0?capTotal/metaTotal*100:0;
+  const pctIdeal=DU_PASS/DU_MES*100;
+  const diasRest=DU_MES-DU_PASS;
+  const falta=Math.max(metaTotal-capTotal,0);
+  const proj=DU_PASS>0?(capTotal/DU_PASS)*DU_MES:capTotal;
+  const intTotal=assessores.reduce((s,a)=>s+a.l1+a.r1+a.r2+a.r3,0);
+
+  const totalCapCls=capTotal<0?'neg':capTotal>=metaTotal?'good':'warn';
+  const projCls=proj>=metaTotal?'good':proj<0?'neg':'warn';
+  const defasagem=pctTotal-pctIdeal;
+
+  document.getElementById('totals-section').innerHTML=`
+    <div class="total-item">
+      <div class="total-label">Captação Total</div>
+      <div class="total-val ${totalCapCls}">${fmt(capTotal)}</div>
+      <div class="total-sub ${defasagem>=0?'good':'neg'}">${defasagem>=0?'▲':'▼'} ${Math.abs(defasagem).toFixed(1)}% vs ritmo</div>
+    </div>
+    <div class="divider"></div>
+    <div class="total-item">
+      <div class="total-label">Meta do Escritório</div>
+      <div class="total-val" style="color:var(--white)">${fmt(metaTotal)}</div>
+      <div class="total-sub">${pctTotal.toFixed(1)}% concluído</div>
+    </div>
+    <div class="divider"></div>
+    <div class="total-item">
+      <div class="total-label">Faltam</div>
+      <div class="total-val warn">${fmt(falta)}</div>
+      <div class="total-sub">${diasRest} dias úteis</div>
+    </div>
+    <div class="divider"></div>
+    <div class="total-item">
+      <div class="total-label">Projeção Mês</div>
+      <div class="total-val ${projCls}">${fmt(proj)}</div>
+    </div>
+    <div class="divider"></div>
+    <div class="total-item">
+      <div class="total-label">Atividades Totais</div>
+      <div class="total-val" style="color:var(--gold)">${intTotal}</div>
+      <div class="total-sub">L1+R1+R2+R3</div>
+    </div>
+  `;
+
+  // Animar barras
+  setTimeout(()=>{
+    document.querySelectorAll('[data-w]').forEach(el=>{
+      el.style.transition='width 1.4s ease';
+      el.style.width=el.getAttribute('data-w')+'%';
+    });
+  },500);
+
+  setTimeout(()=>document.getElementById('loading').classList.add('hidden'),1200);
+}
+
+loadData();
+setInterval(loadData, 5*60*1000);
+</script>
+</body>
+</html>
