@@ -123,9 +123,9 @@ body::after {
 
 .player-row {
   display:grid;
-  grid-template-columns: 44px 1fr 140px 100px 160px;
-  align-items:center; gap:12px;
-  padding:10px 16px;
+  grid-template-columns: 50px 1fr 160px 120px 180px;
+  align-items:center; gap:16px;
+  padding:12px 20px;
   border-radius:4px;
   border:1px solid transparent;
   transition:all 0.3s ease;
@@ -178,22 +178,22 @@ body::after {
 .p-cap.neg { color:var(--red); }
 
 /* % meta */
-.p-pct-wrap { display:flex; flex-direction:column; align-items:flex-end; gap:3px; padding:0 8px; }
+.p-pct-wrap { display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
 .p-pct {
-  font-family:'Barlow Condensed'; font-size:20px; font-weight:800;
+  font-family:'Barlow Condensed'; font-size:22px; font-weight:800; line-height:1;
 }
-.p-bar { height:3px; width:80px; background:rgba(255,255,255,0.1); border-radius:2px; overflow:hidden; }
+.p-bar { height:3px; width:100%; background:rgba(255,255,255,0.1); border-radius:2px; overflow:hidden; }
 .p-bar-fill { height:100%; border-radius:2px; transition:width 1.4s ease; }
 .p-bar-fill.senior { background:var(--senior); }
 .p-bar-fill.pleno  { background:var(--pleno); }
 .p-bar-fill.junior { background:var(--junior); }
 
 /* intensidade */
-.p-int { display:flex; gap:4px; justify-content:flex-end; }
+.p-int { display:flex; gap:5px; justify-content:flex-end; flex-wrap:nowrap; }
 .p-badge {
-  font-family:'DM Mono'; font-size:11px; font-weight:500;
-  padding:3px 7px; border-radius:3px; text-align:center;
-  min-width:28px;
+  font-family:'DM Mono'; font-size:12px; font-weight:600;
+  padding:4px 9px; border-radius:3px; text-align:center;
+  min-width:34px; white-space:nowrap;
 }
 .p-badge.l1-ok { background:rgba(34,197,94,0.2);  color:var(--green); }
 .p-badge.l1-0  { background:rgba(255,255,255,0.05); color:var(--dim); }
