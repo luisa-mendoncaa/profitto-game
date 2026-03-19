@@ -189,20 +189,22 @@ body::after {
 .p-bar-fill.junior { background:var(--junior); }
 
 /* intensidade */
-.p-int { display:flex; gap:5px; justify-content:flex-end; flex-wrap:nowrap; }
+.p-int { display:flex; gap:6px; justify-content:flex-end; flex-wrap:nowrap; }
+.p-badge-wrap { display:flex; flex-direction:column; align-items:center; gap:2px; }
+.p-badge-label { font-family:'DM Mono'; font-size:8px; font-weight:700; letter-spacing:1px; color:var(--dim); text-transform:uppercase; }
 .p-badge {
-  font-family:'DM Mono'; font-size:12px; font-weight:600;
-  padding:4px 9px; border-radius:3px; text-align:center;
-  min-width:34px; white-space:nowrap;
+  font-family:'Barlow Condensed'; font-size:16px; font-weight:800;
+  padding:4px 0; border-radius:3px; text-align:center;
+  width:36px; display:block;
 }
 .p-badge.l1-ok { background:rgba(34,197,94,0.2);  color:var(--green); }
-.p-badge.l1-0  { background:rgba(255,255,255,0.05); color:var(--dim); }
+.p-badge.l1-0  { background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.2); }
 .p-badge.r1-ok { background:rgba(251,191,36,0.2);  color:var(--gold); }
-.p-badge.r1-0  { background:rgba(255,255,255,0.05); color:var(--dim); }
+.p-badge.r1-0  { background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.2); }
 .p-badge.r2-ok { background:rgba(59,130,246,0.2);  color:var(--pleno); }
-.p-badge.r2-0  { background:rgba(255,255,255,0.05); color:var(--dim); }
+.p-badge.r2-0  { background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.2); }
 .p-badge.r3-ok { background:rgba(139,92,246,0.2);  color:#a78bfa; }
-.p-badge.r3-0  { background:rgba(255,255,255,0.05); color:var(--dim); }
+.p-badge.r3-0  { background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.2); }
 
 /* ── SIDEBAR ── */
 .sidebar {
@@ -490,10 +492,10 @@ function renderAll(assessores, times){
         <div class="p-bar"><div class="p-bar-fill ${k}" data-w="${barW}" style="width:0%"></div></div>
       </div>
       <div class="p-int">
-        <span class="p-badge ${a.l1>0?'l1-ok':'l1-0'}">L${a.l1}</span>
-        <span class="p-badge ${a.r1>0?'r1-ok':'r1-0'}">R${a.r1}</span>
-        <span class="p-badge ${a.r2>0?'r2-ok':'r2-0'}">${a.r2}</span>
-        <span class="p-badge ${a.r3>0?'r3-ok':'r3-0'}">${a.r3}</span>
+        <div class="p-badge-wrap"><div class="p-badge-label">L1</div><span class="p-badge ${a.l1>0?'l1-ok':'l1-0'}">${a.l1}</span></div>
+        <div class="p-badge-wrap"><div class="p-badge-label">R1</div><span class="p-badge ${a.r1>0?'r1-ok':'r1-0'}">${a.r1}</span></div>
+        <div class="p-badge-wrap"><div class="p-badge-label">R2</div><span class="p-badge ${a.r2>0?'r2-ok':'r2-0'}">${a.r2}</span></div>
+        <div class="p-badge-wrap"><div class="p-badge-label">R3</div><span class="p-badge ${a.r3>0?'r3-ok':'r3-0'}">${a.r3}</span></div>
       </div>
     </div>`;
   }).join('');
